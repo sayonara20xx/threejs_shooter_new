@@ -3,10 +3,13 @@ import io from 'socket.io-client';
 import { AudioListener, AudioLoader, BoxGeometry, CircleBufferGeometry, Clock, DirectionalLight, DoubleSide, Geometry, HemisphereLight, Mesh, MeshBasicMaterial, MeshPhongMaterial, NearestFilter, Object3D, PCFSoftShadowMap, PerspectiveCamera, Points, PointsMaterial, PositionalAudio, RepeatWrapping, Scene, Texture, TextureLoader, Vector3, WebGLRenderer } from 'three';
 import { MTLLoader } from 'three/examples/jsm/loaders/MTLLoader';
 import { OBJLoader } from 'three/examples/jsm/loaders/OBJLoader';
+import { FBXLoader } from 'three/examples/jsm/loaders/FBXLoader';
 import { Box as CustomBox } from './box';
 import { Bullet } from './bullet';
 import { PointerLockControls } from './lib/PointerLockControls';
 import { Player, PlayerJSON } from './player';
+
+import { ShapeType, threeToCannon } from 'three-to-cannon';
 
 enum Keyboard {
   left = 'KeyA',
@@ -199,6 +202,9 @@ class Main {
     // setup world
     this.setupWorld();
 
+    // setup world map
+    this.loadRoom();
+
     // setup renderer
     this.setupRenderer();
 
@@ -250,7 +256,7 @@ class Main {
 
   setupWorld(): void {
     this.world.broadphase = new NaiveBroadphase();
-    this.world.gravity = new Vec3(0, -20, 0);
+    this.world.gravity = new Vec3(0, -10, 0); // set up gravity (second vector for up-down direction)
     this.world.quatNormalizeSkip = 0;
     this.world.quatNormalizeFast = false;
 
@@ -517,6 +523,95 @@ class Main {
     this.player.setGround(this.controller.ground);
     
     this.socket.emit('update', this.player);
+  }
+
+  loadRoom() : void {
+    const fbxLoader = new FBXLoader()
+    fbxLoader.load(
+      'assets/room.fbx',
+      (object) => {
+        object.traverse(function (child) {
+            if ((child as THREE.Mesh).isMesh) {
+                // (child as THREE.Mesh).material = material
+                if ((child as THREE.Mesh).material) {
+                    ((child as THREE.Mesh).material as THREE.MeshBasicMaterial).transparent = false
+                }
+            }
+        })
+        object.scale.set(.1, .1, .1)
+        object.position.set(-65, -10, 0) // set room positiom
+
+        this.scene.add(object)
+      },
+    (xhr) => {
+        console.log((xhr.loaded / xhr.total) * 100 + '% loaded')
+    },
+    (error) => {
+        console.log(error)
+    }
+    )
+
+    fbxLoader.load(
+      'assets/sniper_rifle.fbx',
+      (object) => {
+        object.traverse(function (child) {
+            if ((child as THREE.Mesh).isMesh) {
+                // (child as THREE.Mesh).material = material
+                if ((child as THREE.Mesh).material) {
+                    ((child as THREE.Mesh).material as THREE.MeshBasicMaterial).transparent = false
+                }
+            }
+        })
+        object.scale.set(.1, .1, .1)
+        object.position.set(10, 30, -50)
+
+        this.scene.add(object)
+      },
+    (xhr) => {
+        console.log((xhr.loaded / xhr.total) * 100 + '% loaded')
+    },
+    (error) => {
+        console.log(error)
+    }
+    )
+
+    fbxLoader.load(
+      'assets/container.fbx',
+      (object) => {
+        object.traverse(function (child) {
+            if ((child as THREE.Mesh).isMesh) {
+                // (child as THREE.Mesh).material = material
+                if ((child as THREE.Mesh).material) {
+                    ((child as THREE.Mesh).material as THREE.MeshBasicMaterial).transparent = false
+                }
+            }
+        })
+        object.scale.set(.01, .01, .01)
+        object.position.set(0, 0, 0)
+
+        this.scene.add(object)
+
+        // Для создания коллизий мне нужен объект body или объект shape, на основе которого можно создать body
+        // где-то нашёл инфу, что на основе меша можно сделать Physic collider
+        // https://discourse.threejs.org/t/how-can-i-make-colliders-from-glb-objects-with-cannon-js/17059
+
+        // установил three-to-cannon либу
+
+        const result = threeToCannon(object, {type: ShapeType.BOX});
+        const shape = result!.shape;
+
+        //const shape = new Box(new Vec3(width / 2, height / 2, depth / 2));
+
+        const body = new Body({shape, mass: 0});
+        this.world.addBody(body);
+      },
+    (xhr) => {
+        console.log((xhr.loaded / xhr.total) * 100 + '% loaded')
+    },
+    (error) => {
+        console.log(error)
+    }
+    )
   }
 
   public static main() {
