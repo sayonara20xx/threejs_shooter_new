@@ -18,7 +18,6 @@ enum Keyboard {
 }
 
 class Main {
-
   private readonly world: World = new World()
   private readonly scene: Scene = new Scene();
   private readonly renderer: WebGLRenderer = new WebGLRenderer({antialias: false});
