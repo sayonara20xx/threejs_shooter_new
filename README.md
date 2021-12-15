@@ -1,7 +1,5 @@
 # threejs-fps
 
- ![alt text](screenshot.gif "Screenshot").
-
 ## Table of Contents
 
 - [About](#about)
