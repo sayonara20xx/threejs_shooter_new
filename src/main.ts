@@ -1,6 +1,6 @@
 import { Body, Box, ContactMaterial, GSSolver, Material, NaiveBroadphase, Vec3, World } from 'cannon-es';
 import io from 'socket.io-client';
-import { AudioListener, AudioLoader, BoxGeometry, CircleBufferGeometry, Clock, DirectionalLight, DoubleSide, Geometry, HemisphereLight, Mesh, MeshBasicMaterial, MeshPhongMaterial, NearestFilter, Object3D, PCFSoftShadowMap, PerspectiveCamera, Points, PointsMaterial, PositionalAudio, RepeatWrapping, Scene, Texture, TextureLoader, Vector3, WebGLRenderer } from 'three';
+import { AudioListener, AudioLoader, BoxGeometry, CircleBufferGeometry, Clock, DirectionalLight, DoubleSide, Geometry, HemisphereLight, Mesh, MeshBasicMaterial, MeshPhongMaterial, NearestFilter, Object3D, PCFSoftShadowMap, PerspectiveCamera, Points, PointsMaterial, PositionalAudio, RepeatWrapping, Scene, Texture, TextureLoader, Vector3, WebGLRenderer, SphereGeometry  } from 'three';
 import { MTLLoader } from 'three/examples/jsm/loaders/MTLLoader';
 import { OBJLoader } from 'three/examples/jsm/loaders/OBJLoader';
 import { FBXLoader } from 'three/examples/jsm/loaders/FBXLoader';
@@ -428,7 +428,8 @@ class Main {
 
   createSkyBox(): void{
     const mesh = new Mesh(
-      new BoxGeometry(1000, 1000, 1000),
+      //new BoxGeometry(1000, 1000, 1000),
+      new SphereGeometry(1000, 25, 25),
       new MeshBasicMaterial({map: this.textures[0], side: DoubleSide})
     );
     this.scene.add(mesh);
